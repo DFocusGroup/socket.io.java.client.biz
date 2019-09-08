@@ -24,6 +24,8 @@ DFocus wanted ssp solution - java-client.
 </dependency>
 ```
 
+> Currently, you have to install the library to your local repo, with `bash shells/install.sh`
+
 ## Usage
 
 ```java
