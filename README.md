@@ -29,7 +29,7 @@ DFocus wanted ssp solution - java-client.
 ```java
 public class SocketIoClientBizTest {
     public static void main(String[] args) {
-        SocketOpts opts = new SocketOpts("http://hi.dfocus.com", "fm", "your token");
+        SocketOpts opts = new SocketOpts("http://hi.dfocus.com", "your projectId", "your token");
         SocketIoClientBiz biz = new SocketIoClientBiz(opts);
 
         biz.connect(new Finish() {
