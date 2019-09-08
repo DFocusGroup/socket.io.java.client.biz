@@ -53,4 +53,4 @@ public class SocketIoClientBizTest {
 
 [MIT License](https://raw.githubusercontent.com/DFocusFE/socket.io.java.client.biz/master/LICENSE)
 
-[license-url]: https://img.shields.io/npm/l/socket.io.java.client.biz.svg
+[license-url]: https://img.shields.io/github/license/dfocusfe/socket.io.java.client.biz
