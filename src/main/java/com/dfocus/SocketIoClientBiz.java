@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.dfocus.socket.AuthCode;
-import com.dfocus.socket.AuthStruct;
 import com.dfocus.socket.BizEvent;
 import com.dfocus.socket.ClientState;
 import com.dfocus.socket.EventCallback;
@@ -20,14 +19,15 @@ import com.dfocus.socket.Helper;
 import com.dfocus.socket.SocketOpts;
 import com.dfocus.socket.StateChangeCallback;
 import com.dfocus.socket.SubscribeCode;
+import com.dfocus.socket.Subscription;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.socket.client.Ack;
 import io.socket.client.IO;
-import io.socket.client.Socket;
 import io.socket.client.IO.Options;
+import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 public class SocketIoClientBiz {
@@ -156,30 +156,65 @@ public class SocketIoClientBiz {
         }
     }
 
-    public void onStateChange(StateChangeCallback cb) {
+    public Subscription onStateChange(final StateChangeCallback cb) {
         if (cb == null) {
-            return;
+            return new Subscription() {
+                @Override
+                public void dispose() {
+                }
+            };
         }
 
         if (!this.stateChangeCallbacks.contains(cb)) {
             this.stateChangeCallbacks.add(cb);
         }
+
+        return new Subscription() {
+            @Override
+            public void dispose() {
+                stateChangeCallbacks.remove(cb);
+            }
+        };
     }
 
     private void changeState(final ClientState state) {
-        this.stateChangeCallbacks.forEach(new Consumer<StateChangeCallback>() {
+        stateChangeCallbacks.forEach(new Consumer<StateChangeCallback>() {
             public void accept(StateChangeCallback cb) {
                 cb.onChange(state);
             }
         });
     }
 
-    public void subscribe(String topic, String event, EventCallback callback) {
+    public Subscription subscribe(final String topic, final String event, final EventCallback callback) {
         if (topic == null || event == null || callback == null) {
             throw new RuntimeException("topic or event or callback cannot be empty");
         }
 
-        events.add(new EventStruct(topic, event, callback));
+        final Emitter.Listener eventListener = new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject obj = (JSONObject) args[0];
+                EventMessage message;
+                try {
+                    message = new EventMessage(obj.getString("projectId"), obj.getString("topic"),
+                            obj.getString("event"), obj.getString("payload"));
+                    if (topic.equals(message.getTopic())) {
+                        callback.onFire(message);
+                    }
+                } catch (JSONException err) {
+                    System.err.println(err);
+                }
+
+            }
+        };
+
+        events.add(new EventStruct(topic, event, eventListener));
+        return new Subscription() {
+            @Override
+            public void dispose() {
+                socket.off(event, eventListener);
+            }
+        };
     }
 
     private void startProcess() {
@@ -203,24 +238,7 @@ public class SocketIoClientBiz {
 
                 events.forEach(new Consumer<EventStruct>() {
                     public void accept(final EventStruct e) {
-                        socket.on(e.getEvent(), new Emitter.Listener() {
-
-                            @Override
-                            public void call(Object... args) {
-                                JSONObject obj = (JSONObject) args[0];
-                                EventMessage message;
-                                try {
-                                    message = new EventMessage(obj.getString("projectId"), obj.getString("topic"),
-                                            obj.getString("event"), obj.getString("payload"));
-                                    if (e.getTopic().equals(message.getTopic())) {
-                                        e.getCallback().onFire(message);
-                                    }
-                                } catch (JSONException err) {
-                                    System.err.println(err);
-                                }
-
-                            }
-                        });
+                        socket.on(e.getEvent(), e.getCallback());
                     }
                 });
             }

@@ -1,11 +1,13 @@
 package com.dfocus.socket;
 
+import io.socket.emitter.Emitter.Listener;
+
 public class EventStruct {
     private String topic;
     private String event;
-    private EventCallback callback;
+    private Listener callback;
 
-    public EventStruct(String topic, String event, EventCallback callback) {
+    public EventStruct(String topic, String event, Listener callback) {
         this.topic = topic;
         this.event = event;
         this.callback = callback;
@@ -27,11 +29,11 @@ public class EventStruct {
         this.event = event;
     }
 
-    public EventCallback getCallback() {
+    public Listener getCallback() {
         return callback;
     }
 
-    public void setCallback(EventCallback callback) {
+    public void setCallback(Listener callback) {
         this.callback = callback;
     }
 
