@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Helper",
+            "request": "launch",
+            "mainClass": "com.dfocus.socket.Helper",
+            "projectName": "socket.io.java.client.biz"
+        }
+    ]
+}
