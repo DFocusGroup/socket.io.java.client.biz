@@ -2,4 +2,20 @@
 
 SHELL_FOLDER=$(dirname "$0")
 
-mvn install:install-file -Dfile=${SHELL_FOLDER}/socket.io.java.client.biz-1.0-SNAPSHOT-jar-with-dependencies.jar -DgroupId=com.dfocus -DartifactId=socket.io.java.client.biz -Dversion=1.0-SNAPSHOT -Dpackaging=jar
+cd $SHELL_FOLDER
+cd ..
+
+mvn clean install
+
+rm -rf ${SHELL_FOLDER}/*.jar
+
+mv target/socket.io.java.client.biz-1.0-SNAPSHOT-jar-with-dependencies.jar $SHELL_FOLDER
+mv target/socket.io.java.client.biz-1.0-SNAPSHOT-sources.jar $SHELL_FOLDER
+
+mvn install:install-file \
+ -Dfile=${SHELL_FOLDER}/socket.io.java.client.biz-1.0-SNAPSHOT-jar-with-dependencies.jar \
+ -Dsources=${SHELL_FOLDER}/socket.io.java.client.biz-1.0-SNAPSHOT-sources.jar \
+ -DgroupId=com.dfocus \
+ -DartifactId=socket.io.java.client.biz \
+ -Dversion=1.0-SNAPSHOT \
+ -Dpackaging=jar
