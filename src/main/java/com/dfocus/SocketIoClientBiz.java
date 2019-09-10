@@ -76,28 +76,28 @@ public class SocketIoClientBiz {
             }
         });
 
-        this.socket.on(Socket.EVENT_RECONNECT.toString(), new Emitter.Listener() {
+        this.socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 changeState(ClientState.CONNECTED);
             }
         });
 
-        this.socket.on(Socket.EVENT_CONNECTING.toString(), new Emitter.Listener() {
+        this.socket.on(Socket.EVENT_CONNECTING, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 changeState(ClientState.CONNECTING);
             }
         });
 
-        this.socket.on(Socket.EVENT_RECONNECTING.toString(), new Emitter.Listener() {
+        this.socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 changeState(ClientState.CONNECTING);
             }
         });
 
-        this.socket.on(Socket.EVENT_CONNECT.toString(), new Emitter.Listener() {
+        this.socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
@@ -110,9 +110,11 @@ public class SocketIoClientBiz {
 
                     @Override
                     public void call(Object... authCode) {
-                        System.out.println("Handshake status " + authCode);
 
                         AuthCode code = AuthCode.from((String) authCode[0]);
+
+                        System.out.println("Handshake status " + code);
+
                         // failed to auth, disconnect and won't retry
                         if (AuthCode.AUTH_FAILED.equals(code)) {
                             onConnected.onFinished(code.toString());
