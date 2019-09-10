@@ -54,7 +54,7 @@ public class SocketIoClientBizTest {
 		});
 
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(10000000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

@@ -62,20 +62,6 @@ public class SocketIoClientBiz {
         changeState(ClientState.CONNECTING);
         System.out.println("Trying to connect to ssp Server...");
 
-        DISCONNECT_EVENTS.forEach(new Consumer<String>() {
-
-            public void accept(String e) {
-                socket.on(e, new Emitter.Listener() {
-
-                    @Override
-                    public void call(Object... args) {
-                        changeState(ClientState.DISCONNECTED);
-                        endProcess();
-                    }
-                });
-            }
-        });
-
         this.socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
@@ -96,6 +82,15 @@ public class SocketIoClientBiz {
                 changeState(ClientState.CONNECTING);
             }
         });
+
+        final Emitter.Listener errorListener = new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onConnected.onFinished(args[0].toString());
+            }
+        };
+
+        this.socket.on(Socket.EVENT_ERROR, errorListener);
 
         this.socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
@@ -121,8 +116,25 @@ public class SocketIoClientBiz {
                             disconnect();
                             return;
                         }
+                        socket.off(Socket.EVENT_ERROR, errorListener);
+
                         changeState(ClientState.CONNECTED);
                         onConnected.onFinished("");
+
+                        DISCONNECT_EVENTS.forEach(new Consumer<String>() {
+
+                            public void accept(String e) {
+                                socket.on(e, new Emitter.Listener() {
+
+                                    @Override
+                                    public void call(Object... args) {
+                                        changeState(ClientState.DISCONNECTED);
+                                        endProcess();
+                                    }
+                                });
+                            }
+                        });
+
                         startProcess();
                     }
                 });
@@ -139,6 +151,8 @@ public class SocketIoClientBiz {
         socketOptions.reconnectionAttempts = this.opts.getReconnect().getReconnectionAttempts();
         socketOptions.reconnectionDelay = this.opts.getReconnect().getReconnectionDelay();
         socketOptions.reconnectionDelayMax = this.opts.getReconnect().getReconnectionDelayMax();
+        socketOptions.multiplex = false;
+        socketOptions.transports = new String[] { "websocket" };
         return socketOptions;
     }
 
