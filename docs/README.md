@@ -1,10 +1,19 @@
-# socket.io.java.client.biz
+---
+home: true
+actionText: More Information
+actionLink: /api/
+---
 
+[![NPM version][npm-image]][npm-url]
+![][david-url]
+![][dt-url]
 ![][license-url]
 
-DFocus wanted ssp solution - java-client.
+DFocus wanted ssp solution - java-client. It is a porting version of [socket.io.client.biz](https://github.com/DFocusFE/socket.io.client.biz).
 
-`socket.io.java.client.biz` is a porting version of [socket.io.client.biz](https://raw.githubusercontent.com/DFocusFE/socket.io.client.biz), which is made for domain specific business scenarios. It consists of following features:
+It must be work with the specific Backend(TBD)
+
+`socket.io.java.client.biz` is made for domain specific business scenarios. It consists of following features:
 
 - re-connect
 - authentication via token
@@ -12,7 +21,7 @@ DFocus wanted ssp solution - java-client.
 - easy to distinguish events from topics
 - no need to worry about re-subscribe process whenever re-connect triggered
 
-## Depdencies
+## Install
 
 Currently, you can only use `socket.io.java.client.biz` from the [source](https://github.com/DFocusFE/socket.io.java.client.biz).
 
@@ -25,7 +34,7 @@ cd socket.io.java.client.biz.git
 mvn clean install
 ```
 
-### maven
+**maven**
 
 ```xml
 <dependency>
@@ -35,7 +44,7 @@ mvn clean install
 </dependency>
 ```
 
-### gradle
+**gradle**
 
 Add `mavenLocal()` to `build.gradle`
 
@@ -48,8 +57,6 @@ allprojects {
     }
 }
 ```
-
-Add dependency
 
 ```
 dependencies {
@@ -109,6 +116,10 @@ public class SocketIoClientBizTest {
 
 ## LICENSE
 
-[MIT License](https://raw.githubusercontent.com/DFocusFE/socket.io.java.client.biz/master/LICENSE)
+[MIT License](https://raw.githubusercontent.com/DFocusFE/socket.io.client.biz/master/LICENSE)
 
-[license-url]: https://img.shields.io/github/license/dfocusfe/socket.io.java.client.biz
+[npm-url]: https://npmjs.org/package/socket.io.client.biz
+[npm-image]: https://badge.fury.io/js/socket.io.client.biz.png
+[david-url]: https://david-dm.org/DFocusFE/socket.io.client.biz.png
+[dt-url]: https://img.shields.io/npm/dt/socket.io.client.biz.svg
+[license-url]: https://img.shields.io/npm/l/socket.io.client.biz.svg

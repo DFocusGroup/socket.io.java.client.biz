@@ -1,0 +1,24 @@
+{
+  "name": "socket.io.java.client.biz",
+  "version": "1.0.0",
+  "description": "DFocus wanted ssp java client",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:deploy": "vuepress build docs && gh-pages -d docs/.vuepress/dist"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DFocusFE/socket.io.java.client.biz.git"
+  },
+  "author": "Howard.Zuo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DFocusFE/socket.io.java.client.biz/issues"
+  },
+  "homepage": "https://github.com/DFocusFE/socket.io.java.client.biz#readme",
+  "devDependencies": {
+    "gh-pages": "^2.1.1",
+    "vuepress": "^1.0.4"
+  }
+}
