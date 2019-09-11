@@ -4,9 +4,6 @@ actionText: More Information
 actionLink: /api/
 ---
 
-[![NPM version][npm-image]][npm-url]
-![][david-url]
-![][dt-url]
 ![][license-url]
 
 DFocus wanted ssp solution - java-client. It is a porting version of [socket.io.java.client.biz](https://github.com/DFocusFE/socket.io.java.client.biz).
@@ -118,8 +115,4 @@ public class SocketIoClientBizTest {
 
 [MIT License](https://raw.githubusercontent.com/DFocusFE/socket.io.java.client.biz/master/LICENSE)
 
-[npm-url]: https://npmjs.org/package/socket.io.java.client.biz
-[npm-image]: https://badge.fury.io/js/socket.io.java.client.biz.png
-[david-url]: https://david-dm.org/DFocusFE/socket.io.java.client.biz.png
-[dt-url]: https://img.shields.io/npm/dt/socket.io.java.client.biz.svg
-[license-url]: https://img.shields.io/npm/l/socket.io.java.client.biz.svg
+[license-url]: https://img.shields.io/github/license/dfocusfe/socket.io.java.client.biz
