@@ -6,3 +6,4 @@
 # dist
 target/
 .vuepress
+node_modules/
