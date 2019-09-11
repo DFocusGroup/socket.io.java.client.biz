@@ -24,7 +24,7 @@ DFocus wanted ssp solution - java-client.
 </dependency>
 ```
 
-> Currently, you have to install the library to your local repo, with `bash shells/install.sh`
+> Currently, you have to install the library to your local repo, with `mvn clean install`
 
 ## Usage
 
@@ -34,20 +34,47 @@ public class SocketIoClientBizTest {
         SocketOpts opts = new SocketOpts("http://hi.dfocus.com", "your projectId", "your token");
         SocketIoClientBiz biz = new SocketIoClientBiz(opts);
 
-        biz.connect(new Finish() {
-            @Override
-            public void onFinished(String msg) {
-                if ("".equals(msg)) {
-                    System.out.println("Connection established");
-                } else {
-                    System.out.println("Failed to connect to server: " + msg);
-                }
+        try{
+            biz.connect(new Finish() {
+                @Override
+                public void onFinished(String msg) {
+                    if ("".equals(msg)) {
+                        System.out.println("Connection established");
+                    } else {
+                        System.out.println("Failed to connect to server: " + msg);
+                    }
 
-            }
-        });
+                }
+            });
+
+            biz.subscribe("your topic", "your event", new EventCallback() {
+                @Override
+                public void onFire(final EventMessage message) {
+                    @Override
+                    public void run() {
+                        System.out.println("Message from server: " + message.getPayload());
+                    }
+                }
+            });
+
+            biz.onStateChange(new StateChangeCallback() {
+                @Override
+                public void onChange(final ClientState s) {
+                    System.out.println("State Changed: " + s);
+                }
+            });
+        }
+        catch(InvalidArgumentException e) {
+            e.printStackTrace();
+        }
+        catch(LifecycleException e) {
+            e.printStackTrace();
+        }
     }
 }
 ```
+
+> If you are going to use it with Android, all callbacks has to be called in `runOnUiThread`
 
 ## LICENSE
 

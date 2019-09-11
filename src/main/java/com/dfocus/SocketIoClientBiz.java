@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.dfocus.error.InvalidArgumentException;
+import com.dfocus.error.LifecycleException;
 import com.dfocus.socket.AuthCode;
 import com.dfocus.socket.BizEvent;
 import com.dfocus.socket.ClientState;
@@ -19,6 +21,7 @@ import com.dfocus.socket.StateChangeCallback;
 import com.dfocus.socket.SubscribeCode;
 import com.dfocus.socket.Subscription;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,239 +33,267 @@ import io.socket.emitter.Emitter;
 
 public class SocketIoClientBiz {
 
-    final static List<String> DISCONNECT_EVENTS = Arrays.asList(Socket.EVENT_CONNECT_ERROR,
-            Socket.EVENT_CONNECT_TIMEOUT, Socket.EVENT_DISCONNECT, Socket.EVENT_ERROR, Socket.EVENT_RECONNECT_ERROR,
-            Socket.EVENT_RECONNECT_FAILED);
+	final static List<String> DISCONNECT_EVENTS = Arrays.asList(Socket.EVENT_CONNECT_ERROR,
+			Socket.EVENT_CONNECT_TIMEOUT, Socket.EVENT_DISCONNECT, Socket.EVENT_ERROR, Socket.EVENT_RECONNECT_ERROR,
+			Socket.EVENT_RECONNECT_FAILED);
 
-    private SocketOpts opts;
-    private Socket socket;
-    private List<StateChangeCallback> stateChangeCallbacks;
-    private List<EventStruct> events;
+	private SocketOpts opts;
 
-    public SocketIoClientBiz(SocketOpts opts) {
-        this.opts = opts;
+	private Socket socket;
+	private ClientState state;
 
-        this.stateChangeCallbacks = new ArrayList<StateChangeCallback>();
-        this.events = new ArrayList<EventStruct>();
-    }
+	private List<StateChangeCallback> stateChangeCallbacks;
 
-    public void connect(Finish onConnected) throws URISyntaxException {
-        if (socket != null) {
-            throw new RuntimeException("You cannot call connect multiple times");
-        }
+	private List<EventStruct> events;
 
-        connectToWebsocket(onConnected);
-    }
+	public SocketIoClientBiz(SocketOpts opts) {
+		this.opts = opts;
 
-    private void connectToWebsocket(final Finish onConnected) throws URISyntaxException {
-        socket = IO.socket(Helper.toUrl(opts.getBase(), opts.getProjectId()), getSocketOptions());
+		this.stateChangeCallbacks = new ArrayList<StateChangeCallback>();
+		this.events = new ArrayList<EventStruct>();
+		this.state = ClientState.DISCONNECTED;
+	}
 
-        changeState(ClientState.CONNECTING);
-        System.out.println("Trying to connect to ssp Server...");
+	public void connect(Finish onConnected) throws URISyntaxException, LifecycleException {
+		if (socket != null) {
+			throw new LifecycleException("You cannot call connect multiple times");
+		}
 
-        this.socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                changeState(ClientState.CONNECTED);
-            }
-        });
+		connectToWebsocket(onConnected);
+	}
 
-        this.socket.on(Socket.EVENT_CONNECTING, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                changeState(ClientState.CONNECTING);
-            }
-        });
+	private void connectToWebsocket(final Finish onConnected) throws URISyntaxException {
+		socket = IO.socket(Helper.toUrl(opts.getBase(), opts.getProjectId()), getSocketOptions());
 
-        this.socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                changeState(ClientState.CONNECTING);
-            }
-        });
+		System.out.println("Trying to connect to ssp Server...");
 
-        final Emitter.Listener errorListener = new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                onConnected.onFinished(args[0].toString());
-            }
-        };
+		this.socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				changeState(ClientState.CONNECTED);
+			}
+		});
 
-        this.socket.on(Socket.EVENT_ERROR, errorListener);
+		this.socket.on(Socket.EVENT_CONNECTING, new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				changeState(ClientState.CONNECTING);
+			}
+		});
 
-        this.socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+		this.socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				changeState(ClientState.CONNECTING);
+			}
+		});
 
-            @Override
-            public void call(Object... args) {
-                JSONObject authData = Helper.toJSONObject("projectId", opts.getProjectId(), "token", opts.getToken());
-                System.out.println("EVENT_CONNECT ");
-                // handshake for authentication purpose
-                socket.emit(BizEvent.AUTH.toString(), authData, new Ack() {
+		final Emitter.Listener errorListener = new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
+				onConnected.onFinished(args[0].toString());
+			}
+		};
 
-                    @Override
-                    public void call(Object... authCode) {
+		this.socket.on(Socket.EVENT_ERROR, errorListener);
 
-                        AuthCode code = AuthCode.from((String) authCode[0]);
+		this.socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
-                        System.out.println("Handshake status " + code);
+			@Override
+			public void call(Object... args) {
 
-                        // failed to auth, disconnect and won't retry
-                        if (AuthCode.AUTH_FAILED.equals(code)) {
-                            onConnected.onFinished(code.toString());
-                            disconnect();
-                            return;
-                        }
-                        socket.off(Socket.EVENT_ERROR, errorListener);
+				final Socket localSoc = socket;
+				JSONObject authData = Helper.toJSONObject("projectId", opts.getProjectId(), "token", opts.getToken());
+				System.out.println("EVENT_CONNECT ");
+				// handshake for authentication purpose
+				socket.emit(BizEvent.AUTH.toString(), authData, new Ack() {
 
-                        changeState(ClientState.CONNECTED);
-                        onConnected.onFinished("");
+					@Override
+					public void call(Object... authCode) {
 
-                        DISCONNECT_EVENTS.forEach(new Consumer<String>() {
+						AuthCode code = AuthCode.from((String) authCode[0]);
 
-                            public void accept(String e) {
-                                socket.on(e, new Emitter.Listener() {
+						System.out.println("Handshake status " + code);
 
-                                    @Override
-                                    public void call(Object... args) {
-                                        changeState(ClientState.DISCONNECTED);
-                                        endProcess();
-                                    }
-                                });
-                            }
-                        });
+						// failed to auth, disconnect and won't retry
+						if (AuthCode.AUTH_FAILED.equals(code)) {
+							onConnected.onFinished(code.toString());
+							disconnect();
+							return;
+						}
+						socket.off(Socket.EVENT_ERROR, errorListener);
 
-                        startProcess();
-                    }
-                });
-            }
-        });
+						
+						onConnected.onFinished("");
 
-        socket.connect();
-    }
+						DISCONNECT_EVENTS.forEach(new Consumer<String>() {
 
-    private Options getSocketOptions() {
-        Options socketOptions = new Options();
-        socketOptions.multiplex = false;
-        socketOptions.reconnection = this.opts.getReconnect().getReconnection();
-        socketOptions.reconnectionAttempts = this.opts.getReconnect().getReconnectionAttempts();
-        socketOptions.reconnectionDelay = this.opts.getReconnect().getReconnectionDelay();
-        socketOptions.reconnectionDelayMax = this.opts.getReconnect().getReconnectionDelayMax();
-        socketOptions.multiplex = false;
-        socketOptions.transports = new String[] { "websocket" };
-        return socketOptions;
-    }
+							public void accept(String e) {
+								socket.on(e, new Emitter.Listener() {
 
-    public void disconnect() {
-        try {
-            changeState(ClientState.DISCONNECTED);
+									@Override
+									public void call(Object... args) {
+										changeState(ClientState.DISCONNECTED);
+										endProcess(localSoc);
+									}
+								});
+							}
+						});
 
-            stateChangeCallbacks = new ArrayList<StateChangeCallback>();
-            events = new ArrayList<EventStruct>();
+						startProcess();
 
-            Socket s = this.socket;
-            socket = null;
+						changeState(ClientState.CONNECTED);
+					}
+				});
+			}
+		});
 
-            s.close();
-        } catch (Exception error) {
-            System.err.println(error.getMessage());
-        }
-    }
+		socket.connect();
+	}
 
-    public Subscription onStateChange(final StateChangeCallback cb) {
-        if (cb == null) {
-            return new Subscription() {
-                @Override
-                public void dispose() {
-                }
-            };
-        }
+	private Options getSocketOptions() {
+		Options socketOptions = new Options();
+		socketOptions.multiplex = false;
+		socketOptions.reconnection = this.opts.getReconnect().getReconnection();
+		socketOptions.reconnectionAttempts = this.opts.getReconnect().getReconnectionAttempts();
+		socketOptions.reconnectionDelay = this.opts.getReconnect().getReconnectionDelay();
+		socketOptions.reconnectionDelayMax = this.opts.getReconnect().getReconnectionDelayMax();
+		socketOptions.multiplex = false;
+		socketOptions.transports = new String[] { "websocket" };
+		return socketOptions;
+	}
 
-        if (!this.stateChangeCallbacks.contains(cb)) {
-            this.stateChangeCallbacks.add(cb);
-        }
+	public void disconnect() {
+		try {
+			changeState(ClientState.DISCONNECTED);
 
-        return new Subscription() {
-            @Override
-            public void dispose() {
-                stateChangeCallbacks.remove(cb);
-            }
-        };
-    }
+			// stateChangeCallbacks.clear();
+			// events.clear();
 
-    private void changeState(final ClientState state) {
-        stateChangeCallbacks.forEach(new Consumer<StateChangeCallback>() {
-            public void accept(StateChangeCallback cb) {
-                cb.onChange(state);
-            }
-        });
-    }
+			Socket s = this.socket;
+			socket = null;
 
-    public Subscription subscribe(final String topic, final String event, final EventCallback callback) {
-        if (topic == null || event == null || callback == null) {
-            throw new RuntimeException("topic or event or callback cannot be empty");
-        }
+			s.close();
+		}
+		catch (Exception error) {
+			System.err.println(error.getMessage());
+		}
+	}
 
-        final Emitter.Listener eventListener = new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                JSONObject obj = (JSONObject) args[0];
-                EventMessage message;
-                try {
-                    message = new EventMessage(obj.getString("projectId"), obj.getString("topic"),
-                            obj.getString("event"), obj.getString("payload"));
-                    if (topic.equals(message.getTopic())) {
-                        callback.onFire(message);
-                    }
-                } catch (JSONException err) {
-                    System.err.println(err);
-                }
+	public Subscription onStateChange(final StateChangeCallback cb) {
+		if (cb == null) {
+			return new Subscription() {
+				@Override
+				public void dispose() {
+				}
+			};
+		}
 
-            }
-        };
+		if (!this.stateChangeCallbacks.contains(cb)) {
+			this.stateChangeCallbacks.add(cb);
+		}
 
-        events.add(new EventStruct(topic, event, eventListener));
-        return new Subscription() {
-            @Override
-            public void dispose() {
-                socket.off(event, eventListener);
-            }
-        };
-    }
+		return new Subscription() {
+			@Override
+			public void dispose() {
+				stateChangeCallbacks.remove(cb);
+			}
+		};
+	}
 
-    private void startProcess() {
-        List<String> topics = new ArrayList<>();
-        for (EventStruct e : events) {
-            topics.add(e.getEvent());
-        }
+	private void changeState(final ClientState state) {
+		this.state = state;
 
-        socket.emit(BizEvent.SUBSCRIBE.toString(), topics, new Ack() {
+		stateChangeCallbacks.forEach(new Consumer<StateChangeCallback>() {
+			public void accept(StateChangeCallback cb) {
+				cb.onChange(state);
+			}
+		});
+	}
 
-            @Override
-            public void call(Object... args) {
+	public Subscription subscribe(final String topic, final String event, final EventCallback callback) throws InvalidArgumentException, LifecycleException {
+		if (topic == null || event == null || callback == null) {
+			throw new InvalidArgumentException("topic or event or callback cannot be empty");
+		}
 
-                SubscribeCode code = SubscribeCode.from((String) args[0]);
+		if (ClientState.CONNECTED == state) {
+			throw new LifecycleException("subscribe cannot be called after connection established");
+		}
 
-                System.out.println("subscribe ack code: " + code);
-                if (!SubscribeCode.SUB_SUCCESS.equals(code)) {
-                    // do nothing if it is not allowed
-                    return;
-                }
+		final Emitter.Listener eventListener = new Emitter.Listener() {
+			@Override
+			public void call(Object... args) {
 
-                events.forEach(new Consumer<EventStruct>() {
-                    public void accept(final EventStruct e) {
-                        socket.on(e.getEvent(), e.getCallback());
-                    }
-                });
-            }
-        });
-    }
+				try {
+					String strObj = args[0].toString();
+					JSONObject obj = new JSONObject(strObj);
+					EventMessage message;
+					message = new EventMessage(obj.getString("projectId"), obj.getString("topic"),
+							obj.getString("event"), obj.getString("payload"));
+					if (topic.equals(message.getTopic())) {
+						callback.onFire(message);
+					}
+				}
+				catch (JSONException err) {
+					System.err.println(err);
+				}
 
-    private void endProcess() {
-        this.events.forEach(new Consumer<EventStruct>() {
-            public void accept(EventStruct e) {
-                socket.off(e.getEvent());
-            }
-        });
-    }
+			}
+		};
+
+		events.add(new EventStruct(topic, event, eventListener));
+
+		return new Subscription() {
+			@Override
+			public void dispose() {
+				socket.off(event, eventListener);
+			}
+		};
+	}
+
+	private void startProcess() {
+		JSONArray topics = new JSONArray();
+		for (EventStruct e : events) {
+			topics.put(e.getTopic());
+		}
+		subscribe(events, topics);
+	}
+
+	private void subscribe(final List<EventStruct> events, JSONArray topics) {
+		socket.emit(BizEvent.SUBSCRIBE.toString(), topics, new Ack() {
+
+			@Override
+			public void call(Object... args) {
+
+				SubscribeCode code = SubscribeCode.from((String) args[0]);
+
+				System.out.println("subscribe ack code: " + code);
+				if (!SubscribeCode.SUB_SUCCESS.equals(code)) {
+					// do nothing if it is not allowed
+					return;
+				}
+
+				events.forEach(new Consumer<EventStruct>() {
+					public void accept(final EventStruct e) {
+						socket.on(e.getEvent(), e.getCallback());
+					}
+				});
+			}
+		});
+	}
+
+	private void endProcess(final Socket socket) {
+		this.events.forEach(new Consumer<EventStruct>() {
+			public void accept(EventStruct e) {
+				socket.off(e.getEvent());
+			}
+		});
+
+		DISCONNECT_EVENTS.forEach(new Consumer<String>() {
+			public void accept(String e) {
+				socket.off(e);
+			}
+		});
+	}
 
 }

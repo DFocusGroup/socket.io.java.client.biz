@@ -15,7 +15,6 @@
 		<dependency>
 			<groupId>io.socket</groupId>
 			<artifactId>socket.io-client</artifactId>
-			<scope>provided</scope>
 			<version>1.0.0</version>
 	    </dependency>
 

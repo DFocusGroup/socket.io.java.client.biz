@@ -21,16 +21,17 @@ public class SocketIoClientBizTest {
 		SocketOpts opts = new SocketOpts("http://139.217.99.53:9095", "fm", "invalidToken");
 		SocketIoClientBiz biz = new SocketIoClientBiz(opts);
 
-		biz.connect(new Finish() {
-			@Override
-			public void onFinished(String msg) {
-				local.put("code", msg);
-			}
-		});
 
 		try {
+			biz.connect(new Finish() {
+				@Override
+				public void onFinished(String msg) {
+					local.put("code", msg);
+				}
+			});
 			Thread.sleep(5000);
-		} catch (InterruptedException e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -46,16 +47,18 @@ public class SocketIoClientBizTest {
 				"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6InRlc3QiLCJleHAiOjE1NzAzMjk0MzIsImlhdCI6MTU2NzczNzQzMn0.IxyYPdM1nsAkIN8AsZCu07BiuwryhXr-lIQ_o8fNktrZZvzl7Dgldfb6DMW7reooZs6mDCAGv78_SqiUfBQtDogJOmfoQpqEuHDlG0cGvwT_oGKc6ZiYP-vipHlHP5FXBRwSwymLmF73c7HabC4IPL_4EjfZAzqX0hzeudAJRYs");
 		SocketIoClientBiz biz = new SocketIoClientBiz(opts);
 
-		biz.connect(new Finish() {
-			@Override
-			public void onFinished(String msg) {
-				local.put("code", msg);
-			}
-		});
-
+		
 		try {
+			biz.connect(new Finish() {
+				@Override
+				public void onFinished(String msg) {
+					local.put("code", msg);
+				}
+			});
+	
 			Thread.sleep(10000);
-		} catch (InterruptedException e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 
