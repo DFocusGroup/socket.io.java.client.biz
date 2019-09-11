@@ -3,9 +3,7 @@ package com.dfocus;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import com.dfocus.socket.AuthCode;
@@ -96,9 +94,7 @@ public class SocketIoClientBiz {
 
             @Override
             public void call(Object... args) {
-                Map<String, String> authData = new HashMap<>();
-                authData.put("projectId", opts.getProjectId());
-                authData.put("token", opts.getToken());
+                JSONObject authData = Helper.toJSONObject("projectId", opts.getProjectId(), "token", opts.getToken());
                 System.out.println("EVENT_CONNECT ");
                 // handshake for authentication purpose
                 socket.emit(BizEvent.AUTH.toString(), authData, new Ack() {

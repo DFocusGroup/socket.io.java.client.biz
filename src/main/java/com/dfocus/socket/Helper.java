@@ -1,10 +1,5 @@
 package com.dfocus.socket;
 
-import java.security.KeyStore.Entry;
-import java.util.Map;
-import java.util.function.Consumer;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Helper {
@@ -20,23 +15,18 @@ public class Helper {
                 .replace("http:/", "http://").replace("https:/", "https://");
     }
 
-    public static String toString(final Map<String, String> data) {
+    public static JSONObject toJSONObject(final String... data) {
 
         final JSONObject obj = new JSONObject();
 
-        data.keySet().forEach(new Consumer<String>() {
-            @Override
-            public void accept(String key) {
-                try {
-                    obj.put(key, data.get(key));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+        for (int i = 0; i < data.length; i = i + 2) {
+            try {
+                obj.put(data[i], data[i + 1]);
+            } catch (Exception e) {
 
             }
+        }
 
-        });
-
-        return obj.toString();
+        return obj;
     }
 }

@@ -1,10 +1,7 @@
 package com.dfocus.socket;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -21,20 +18,12 @@ public class HelperTest {
 
 	@Test
 	public void json() throws JSONException {
-		JSONArray obj = new JSONArray();
-
-		Map<String, String> authData = new HashMap<>();
-		authData.put("projectId", "fm");
-		authData.put("token", "dasfasdfa");
-
-		obj.put("auth");
-		obj.put(authData);
-
-		System.out.println("FUCK: " + obj.toString());
+		JSONObject obj = Helper.toJSONObject("projectId", "fm", "token", "asdfg");
 
 		// java 环境 FUCK: ["auth",{"projectId":"fm","token":"dasfasdfa"}]
 		// Android 环境 FUCK: ["auth","{projectId=fm, token=dasfasdfa}"]
 
+		Assert.assertEquals("{\"projectId\":\"fm\",\"token\":\"asdfg\"}", obj.toString());
 	}
 
 }
