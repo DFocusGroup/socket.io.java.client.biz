@@ -1,68 +1,153 @@
 package com.dfocus;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.dfocus.error.LifecycleException;
+import com.dfocus.factories.SocketIOFactory;
 import com.dfocus.socket.AuthCode;
+import com.dfocus.socket.BizEvent;
 import com.dfocus.socket.Finish;
+import com.dfocus.socket.Helper;
 import com.dfocus.socket.SocketOpts;
 
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import io.socket.client.Ack;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 public class SocketIoClientBizTest {
 
-	@Test
-	public void connectWithInvalidToken() throws URISyntaxException {
+	@Test(expected = LifecycleException.class)
+	public void connectCannotBeCalledMultipleTimes() throws URISyntaxException, LifecycleException {
+		SocketOpts opts = new SocketOpts("http://mock.dfocus.com", "fm", "111");
+		SocketIOFactory factory = new SocketIOFactory(opts);
 
-		final Map<String, String> local = new HashMap<String, String>();
+		SocketIoClientBiz biz = new SocketIoClientBiz(factory);
+		
+		biz.connect(new Finish() {
+			@Override
+			public void onFinished(String errorMessage) {}
+		});
 
-		SocketOpts opts = new SocketOpts("http://139.217.99.53:9095", "fm", "invalidToken");
-		SocketIoClientBiz biz = new SocketIoClientBiz(opts);
 
-
-		try {
-			biz.connect(new Finish() {
-				@Override
-				public void onFinished(String msg) {
-					local.put("code", msg);
-				}
-			});
-			Thread.sleep(5000);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		Assert.assertEquals(AuthCode.AUTH_FAILED.toString(), local.get("code"));
+		biz.connect(new Finish() {
+			@Override
+			public void onFinished(String errorMessage) {}
+		});	
+		
 	}
 
 	@Test
-	public void connectWithValidToken() throws URISyntaxException {
+	public void connectWithInvalidToken() throws URISyntaxException, LifecycleException {
 
-		final Map<String, String> local = new HashMap<String, String>();
+		SocketIOFactory factory = mock(SocketIOFactory.class);
+		Socket socket = mock(Socket.class);
 
-		SocketOpts opts = new SocketOpts("http://139.217.99.53:9095", "fm",
-				"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6InRlc3QiLCJleHAiOjE1NzAzMjk0MzIsImlhdCI6MTU2NzczNzQzMn0.IxyYPdM1nsAkIN8AsZCu07BiuwryhXr-lIQ_o8fNktrZZvzl7Dgldfb6DMW7reooZs6mDCAGv78_SqiUfBQtDogJOmfoQpqEuHDlG0cGvwT_oGKc6ZiYP-vipHlHP5FXBRwSwymLmF73c7HabC4IPL_4EjfZAzqX0hzeudAJRYs");
-		SocketIoClientBiz biz = new SocketIoClientBiz(opts);
+		SocketIoClientBiz biz = new SocketIoClientBiz(factory);
 
+		doAnswer(new Answer<Void>() {
+
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				Emitter.Listener callback = (Emitter.Listener)invocation.getArgument(1);
+				callback.call();
+				return null;
+			}
+			
+		}).when(socket)
+			.on(eq(Socket.EVENT_CONNECT), any(Emitter.Listener.class));
+
+		doAnswer(new Answer<Void>() {
+
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				Ack callback = (Ack)invocation.getArgument(2);
+				callback.call("auth_fail");
+				return null;
+			}
+			
+		}).when(socket)
+			.emit(eq(BizEvent.AUTH.toString()), any(JSONObject.class), any(Ack.class));
+	 
 		
+		when(factory.get()).thenReturn(socket);
+		when(factory.getAuthData()).thenReturn(new JSONObject());
+		when(socket.connect()).thenReturn(null);
+
 		try {
-			biz.connect(new Finish() {
+			biz.connect(new Finish(){
 				@Override
-				public void onFinished(String msg) {
-					local.put("code", msg);
+				public void onFinished(String errorMessage) {
+					Assert.assertEquals("auth_fail", errorMessage);
 				}
 			});
-	
-			Thread.sleep(10000);
+		} catch (NullPointerException e) {
+			// do nothing
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		
+	}
 
-		Assert.assertEquals("", local.get("code"));
+	@Test
+	public void connectWithValidToken() throws URISyntaxException, LifecycleException {
+		JSONObject authData = Helper.toJSONObject("projectId", "fm", "token", "validtoken");
+
+		SocketIOFactory factory = mock(SocketIOFactory.class);
+		Socket socket = mock(Socket.class);
+
+		SocketIoClientBiz biz = new SocketIoClientBiz(factory);
+
+		doAnswer(new Answer<Void>() {
+
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				Emitter.Listener callback = (Emitter.Listener)invocation.getArgument(1);
+				callback.call();
+				return null;
+			}
+			
+		}).when(socket)
+			.on(eq(Socket.EVENT_CONNECT), any(Emitter.Listener.class));
+
+		doAnswer(new Answer<Void>() {
+
+			@Override
+			public Void answer(InvocationOnMock invocation) throws Throwable {
+				Ack callback = (Ack)invocation.getArgument(2);
+				callback.call("auth_success");
+				return null;
+			}
+			
+		}).when(socket)
+			.emit(eq(BizEvent.AUTH.toString()), any(JSONObject.class), any(Ack.class));
+	 
+		
+		when(factory.get()).thenReturn(socket);
+		when(factory.getAuthData()).thenReturn(authData);
+		when(socket.connect()).thenReturn(null);
+
+		biz.connect(new Finish(){
+			@Override
+			public void onFinished(String errorMessage) {
+				Assert.assertEquals("", errorMessage);
+			}
+		});
+
+		verify(socket, times(1)).off(eq(Socket.EVENT_ERROR), any(Emitter.Listener.class));
 	}
 
 }

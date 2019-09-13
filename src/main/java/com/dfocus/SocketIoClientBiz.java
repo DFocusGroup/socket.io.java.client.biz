@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import com.dfocus.error.InvalidArgumentException;
 import com.dfocus.error.LifecycleException;
+import com.dfocus.factories.SocketIOFactory;
 import com.dfocus.socket.AuthCode;
 import com.dfocus.socket.BizEvent;
 import com.dfocus.socket.ClientState;
@@ -15,8 +16,6 @@ import com.dfocus.socket.EventCallback;
 import com.dfocus.socket.EventMessage;
 import com.dfocus.socket.EventStruct;
 import com.dfocus.socket.Finish;
-import com.dfocus.socket.Helper;
-import com.dfocus.socket.SocketOpts;
 import com.dfocus.socket.StateChangeCallback;
 import com.dfocus.socket.SubscribeCode;
 import com.dfocus.socket.Subscription;
@@ -26,8 +25,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.socket.client.Ack;
-import io.socket.client.IO;
-import io.socket.client.IO.Options;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
@@ -37,8 +34,7 @@ public class SocketIoClientBiz {
 			Socket.EVENT_CONNECT_TIMEOUT, Socket.EVENT_DISCONNECT, Socket.EVENT_ERROR, Socket.EVENT_RECONNECT_ERROR,
 			Socket.EVENT_RECONNECT_FAILED);
 
-	private SocketOpts opts;
-
+	private SocketIOFactory factory;
 	private Socket socket;
 	private ClientState state;
 
@@ -46,42 +42,44 @@ public class SocketIoClientBiz {
 
 	private List<EventStruct> events;
 
-	public SocketIoClientBiz(SocketOpts opts) {
-		this.opts = opts;
+	public SocketIoClientBiz(SocketIOFactory factory) {
+		this.factory = factory;
 
 		this.stateChangeCallbacks = new ArrayList<StateChangeCallback>();
 		this.events = new ArrayList<EventStruct>();
 		this.state = ClientState.DISCONNECTED;
 	}
 
-	public void connect(Finish onConnected) throws URISyntaxException, LifecycleException {
+	public SocketIoClientBiz connect(Finish onConnected) throws URISyntaxException, LifecycleException {
 		if (socket != null) {
 			throw new LifecycleException("You cannot call connect multiple times");
 		}
 
 		connectToWebsocket(onConnected);
+
+		return this;
 	}
 
 	private void connectToWebsocket(final Finish onConnected) throws URISyntaxException {
-		socket = IO.socket(Helper.toUrl(opts.getBase(), opts.getProjectId()), getSocketOptions());
+		socket = factory.get();
 
 		System.out.println("Trying to connect to ssp Server...");
 
-		this.socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+		socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
 				changeState(ClientState.CONNECTED);
 			}
 		});
 
-		this.socket.on(Socket.EVENT_CONNECTING, new Emitter.Listener() {
+		socket.on(Socket.EVENT_CONNECTING, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
 				changeState(ClientState.CONNECTING);
 			}
 		});
 
-		this.socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+		socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
 			@Override
 			public void call(Object... args) {
 				changeState(ClientState.CONNECTING);
@@ -95,18 +93,17 @@ public class SocketIoClientBiz {
 			}
 		};
 
-		this.socket.on(Socket.EVENT_ERROR, errorListener);
+		socket.on(Socket.EVENT_ERROR, errorListener);
 
-		this.socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+		socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
 			@Override
 			public void call(Object... args) {
 
 				final Socket localSoc = socket;
-				JSONObject authData = Helper.toJSONObject("projectId", opts.getProjectId(), "token", opts.getToken());
 				System.out.println("EVENT_CONNECT ");
 				// handshake for authentication purpose
-				socket.emit(BizEvent.AUTH.toString(), authData, new Ack() {
+				socket.emit(BizEvent.AUTH.toString(), factory.getAuthData(), new Ack() {
 
 					@Override
 					public void call(Object... authCode) {
@@ -151,19 +148,7 @@ public class SocketIoClientBiz {
 		socket.connect();
 	}
 
-	private Options getSocketOptions() {
-		Options socketOptions = new Options();
-		socketOptions.multiplex = false;
-		socketOptions.reconnection = this.opts.getReconnect().getReconnection();
-		socketOptions.reconnectionAttempts = this.opts.getReconnect().getReconnectionAttempts();
-		socketOptions.reconnectionDelay = this.opts.getReconnect().getReconnectionDelay();
-		socketOptions.reconnectionDelayMax = this.opts.getReconnect().getReconnectionDelayMax();
-		socketOptions.multiplex = false;
-		socketOptions.transports = new String[] { "websocket" };
-		return socketOptions;
-	}
-
-	public void disconnect() {
+	public SocketIoClientBiz disconnect() {
 		try {
 			changeState(ClientState.DISCONNECTED);
 
@@ -178,6 +163,7 @@ public class SocketIoClientBiz {
 		catch (Exception error) {
 			System.err.println(error.getMessage());
 		}
+		return this;
 	}
 
 	public Subscription onStateChange(final StateChangeCallback cb) {
