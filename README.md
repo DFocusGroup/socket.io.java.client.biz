@@ -1,5 +1,6 @@
 # socket.io.java.client.biz
 
+[![Build Status](https://travis-ci.org/dfocusfe/socket.io.java.client.biz.png?branch=master)](https://travis-ci.org/dfocusfe/socket.io.java.client.biz)
 ![][license-url]
 
 DFocus wanted ssp solution - java-client.
