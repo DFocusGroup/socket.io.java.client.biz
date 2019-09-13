@@ -9,12 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.dfocus.error.LifecycleException;
 import com.dfocus.factories.SocketIOFactory;
-import com.dfocus.socket.AuthCode;
 import com.dfocus.socket.BizEvent;
 import com.dfocus.socket.Finish;
 import com.dfocus.socket.Helper;
