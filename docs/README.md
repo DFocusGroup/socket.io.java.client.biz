@@ -4,6 +4,7 @@ actionText: More Information
 actionLink: /api/
 ---
 
+[![Build Status](https://travis-ci.org/DFocusGroup/socket.io.java.client.biz.png?branch=master)](https://travis-ci.org/DFocusGroup/socket.io.java.client.biz)
 ![][license-url]
 
 DFocus wanted ssp solution - java-client. It is a porting version of [socket.io.java.client.biz](https://github.com/DFocusGroup/socket.io.java.client.biz).
