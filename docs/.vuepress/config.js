@@ -10,7 +10,7 @@ module.exports = {
       { text: "API", link: "/api/" },
       {
         text: "Github",
-        link: "https://github.com/DFocusFE/socket.io.java.client.biz"
+        link: "https://github.com/DFocusGroup/socket.io.java.client.biz"
       }
     ],
     sidebar: {

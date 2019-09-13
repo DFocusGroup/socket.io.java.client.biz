@@ -6,7 +6,7 @@ actionLink: /api/
 
 ![][license-url]
 
-DFocus wanted ssp solution - java-client. It is a porting version of [socket.io.java.client.biz](https://github.com/DFocusFE/socket.io.java.client.biz).
+DFocus wanted ssp solution - java-client. It is a porting version of [socket.io.java.client.biz](https://github.com/DFocusGroup/socket.io.java.client.biz).
 
 It must be work with the specific Backend(TBD)
 
@@ -20,11 +20,11 @@ It must be work with the specific Backend(TBD)
 
 ## Install
 
-Currently, you can only use `socket.io.java.client.biz` from the [source](https://github.com/DFocusFE/socket.io.java.client.biz).
+Currently, you can only use `socket.io.java.client.biz` from the [source](https://github.com/DFocusGroup/socket.io.java.client.biz).
 
 ```bash
 # clone source code
-git clone https://github.com/DFocusFE/socket.io.java.client.biz.git
+git clone https://github.com/DFocusGroup/socket.io.java.client.biz.git
 cd socket.io.java.client.biz.git
 
 # install the library into your local maven repo
@@ -113,6 +113,6 @@ public class SocketIoClientBizTest {
 
 ## LICENSE
 
-[MIT License](https://raw.githubusercontent.com/DFocusFE/socket.io.java.client.biz/master/LICENSE)
+[MIT License](https://raw.githubusercontent.com/DFocusGroup/socket.io.java.client.biz/master/LICENSE)
 
-[license-url]: https://img.shields.io/github/license/dfocusfe/socket.io.java.client.biz
+[license-url]: https://img.shields.io/github/license/DFocusGroup/socket.io.java.client.biz

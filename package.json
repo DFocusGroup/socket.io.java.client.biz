@@ -9,14 +9,14 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DFocusFE/socket.io.java.client.biz.git"
+    "url": "git+https://github.com/DFocusGroup/socket.io.java.client.biz.git"
   },
   "author": "Howard.Zuo",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/DFocusFE/socket.io.java.client.biz/issues"
+    "url": "https://github.com/DFocusGroup/socket.io.java.client.biz/issues"
   },
-  "homepage": "https://github.com/DFocusFE/socket.io.java.client.biz#readme",
+  "homepage": "https://github.com/DFocusGroup/socket.io.java.client.biz#readme",
   "devDependencies": {
     "gh-pages": "^2.1.1",
     "vuepress": "^1.0.4"
