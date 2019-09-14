@@ -8,11 +8,12 @@ DFocus wanted ssp solution - java-client.
 
 `socket.io.java.client.biz` is a porting version of [socket.io.client.biz](https://raw.githubusercontent.com/DFocusGroup/socket.io.client.biz), which is made for domain specific business scenarios. It consists of following features:
 
+- damn easy, only 4 methods, that's all you need
 - re-connect
 - authentication via token
 - project based, let's say you are working on a SaaS platform, several projects may subscribe topics individually
 - easy to distinguish events from topics
-- no need to worry about re-subscribe process whenever re-connect triggered
+- no need to worry about re-subscribe process whenever network issue happened
 
 ## Depdencies
 
