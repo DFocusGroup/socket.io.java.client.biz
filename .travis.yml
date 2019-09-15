@@ -1,7 +1,6 @@
 language: java
 jdk:
   - openjdk8
-  - oraclejdk7
 sudo: false
 install: mvn install
 after_success:
