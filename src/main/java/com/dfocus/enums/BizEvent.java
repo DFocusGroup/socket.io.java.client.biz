@@ -11,7 +11,7 @@ public enum BizEvent {
 
     public static BizEvent from(String event) {
         for (BizEvent c : BizEvent.values()) {
-            if (c.event.equals(event)) {
+            if (c.equals(event)) {
                 return c;
             }
         }

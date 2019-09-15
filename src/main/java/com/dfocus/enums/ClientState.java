@@ -12,7 +12,7 @@ public enum ClientState {
 
     public static ClientState from(String state) {
         for (ClientState c : ClientState.values()) {
-            if (c.state.equals(state)) {
+            if (c.equals(state)) {
                 return c;
             }
         }

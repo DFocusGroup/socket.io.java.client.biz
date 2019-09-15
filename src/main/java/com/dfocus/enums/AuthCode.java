@@ -11,7 +11,7 @@ public enum AuthCode {
 
     public static AuthCode from(String code) {
         for (AuthCode c : AuthCode.values()) {
-            if (c.code.equals(code)) {
+            if (c.equals(code)) {
                 return c;
             }
         }

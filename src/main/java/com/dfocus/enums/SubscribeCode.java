@@ -11,7 +11,7 @@ public enum SubscribeCode {
 
     public static SubscribeCode from(String code) {
         for (SubscribeCode c : SubscribeCode.values()) {
-            if (c.code.equals(code)) {
+            if (c.equals(code)) {
                 return c;
             }
         }
