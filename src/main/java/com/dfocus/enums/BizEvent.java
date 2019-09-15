@@ -1,4 +1,4 @@
-package com.dfocus.socket;
+package com.dfocus.enums;
 
 public enum BizEvent {
     AUTH("auth"), SUBSCRIBE("subscribe");

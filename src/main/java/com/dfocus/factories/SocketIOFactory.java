@@ -2,8 +2,8 @@ package com.dfocus.factories;
 
 import java.net.URISyntaxException;
 
+import com.dfocus.options.SocketOpts;
 import com.dfocus.socket.Helper;
-import com.dfocus.socket.SocketOpts;
 
 import org.json.JSONObject;
 

@@ -1,4 +1,4 @@
-package com.dfocus.socket;
+package com.dfocus.enums;
 
 import org.junit.Assert;
 import org.junit.Test;

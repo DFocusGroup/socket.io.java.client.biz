@@ -1,4 +1,4 @@
-package com.dfocus.socket;
+package com.dfocus.enums;
 
 public enum AuthCode {
     AUTH_SUCCESS("auth_success"), AUTH_FAILED("auth_fail");

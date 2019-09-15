@@ -10,12 +10,12 @@ import static org.mockito.Mockito.when;
 
 import java.net.URISyntaxException;
 
+import com.dfocus.enums.BizEvent;
 import com.dfocus.error.LifecycleException;
 import com.dfocus.factories.SocketIOFactory;
-import com.dfocus.socket.BizEvent;
+import com.dfocus.options.SocketOpts;
 import com.dfocus.socket.Finish;
 import com.dfocus.socket.Helper;
-import com.dfocus.socket.SocketOpts;
 
 import org.json.JSONObject;
 import org.junit.Assert;

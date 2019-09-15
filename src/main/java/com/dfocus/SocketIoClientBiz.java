@@ -6,18 +6,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.dfocus.enums.AuthCode;
+import com.dfocus.enums.BizEvent;
+import com.dfocus.enums.ClientState;
+import com.dfocus.enums.SubscribeCode;
 import com.dfocus.error.InvalidArgumentException;
 import com.dfocus.error.LifecycleException;
 import com.dfocus.factories.SocketIOFactory;
-import com.dfocus.socket.AuthCode;
-import com.dfocus.socket.BizEvent;
-import com.dfocus.socket.ClientState;
+import com.dfocus.po.EventMessage;
+import com.dfocus.po.EventStruct;
 import com.dfocus.socket.EventCallback;
-import com.dfocus.socket.EventMessage;
-import com.dfocus.socket.EventStruct;
 import com.dfocus.socket.Finish;
 import com.dfocus.socket.StateChangeCallback;
-import com.dfocus.socket.SubscribeCode;
 import com.dfocus.socket.Subscription;
 
 import org.json.JSONArray;

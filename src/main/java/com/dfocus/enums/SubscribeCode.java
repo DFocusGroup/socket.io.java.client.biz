@@ -1,4 +1,4 @@
-package com.dfocus.socket;
+package com.dfocus.enums;
 
 public enum SubscribeCode {
     SUB_SUCCESS("sub_success"), SUB_FAILED("sub_fail");
