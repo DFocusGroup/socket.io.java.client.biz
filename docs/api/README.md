@@ -13,8 +13,9 @@ sidebarDepth: 4
 **Usage**
 
 ```java
-SocketOpts opts = new SocketOpts("http://hi.dfocus.com", "your projectId", "your token");
-SocketIoClientBiz biz = new SocketIoClientBiz(opts);
+SocketOpts opts = new SocketOpts("http://mock.dfocus.com", "your projectId", "your token");
+SocketIOFactory factory = new SocketIOFactory(opts);
+SocketIoClientBiz biz = new SocketIoClientBiz(factory);
 ```
 
 ## Methods
@@ -53,7 +54,7 @@ bizClient.connect(new Finish() {
 
 ```java
 // watch every connection state change
-const stateChangeSub = bizClient.onStateChange(new StateChangeCallback() {
+Subscription stateChangeSub = bizClient.onStateChange(new StateChangeCallback() {
     @Override
     public void onChange(ClientState s) {
         @Override
@@ -77,7 +78,7 @@ stateChangeSub.dispose();
 
 ```java
 // watch for specific event along with its topic
-const eventSub = bizClient.subscribe("spaces", "SPACE_ADDED", new EventCallback() {
+Subscription eventSub = bizClient.subscribe("spaces", "SPACE_ADDED", new EventCallback() {
     @Override
     public void onFire(EventMessage message) {
         @Override

@@ -65,8 +65,9 @@ dependencies {
 ```java
 public class SocketIoClientBizTest {
     public static void main(String[] args) {
-        SocketOpts opts = new SocketOpts("http://hi.dfocus.com", "your projectId", "your token");
-        SocketIoClientBiz biz = new SocketIoClientBiz(opts);
+        SocketOpts opts = new SocketOpts("http://mock.dfocus.com", "your projectId", "your token");
+        SocketIOFactory factory = new SocketIOFactory(opts);
+        SocketIoClientBiz biz = new SocketIoClientBiz(factory);
 
         try{
             biz.connect(new Finish() {
