@@ -29,17 +29,14 @@ SocketIoClientBiz biz = new SocketIoClientBiz(factory);
 **Usage**
 
 ```java
-bizClient.connect(new Finish() {
+biz.connect(new Finish() {
     @Override
-    public void onFinished(final String errorMessage) {
-        @Override
-        public void run() {
-            if ("".equals(errorMessage)) {
-                System.out.println("connected");
-            } else {
-                System.out.println("failed to connect");
-            }
-        }
+    public void onFinished(String errorMessage) {
+		if ("".equals(errorMessage)) {
+			System.out.println("connected");
+		} else {
+			System.out.println("failed to connect");
+		}
     }
 });
 ```
@@ -54,13 +51,10 @@ bizClient.connect(new Finish() {
 
 ```java
 // watch every connection state change
-Subscription stateChangeSub = bizClient.onStateChange(new StateChangeCallback() {
+Subscription stateChangeSub = biz.onStateChange(new StateChangeCallback() {
     @Override
     public void onChange(ClientState s) {
-        @Override
-        public void run() {
-            System.out.println("state changed to " + s);
-        }
+		System.out.println("state changed to " + s);
     }
 });
 
@@ -78,13 +72,10 @@ stateChangeSub.dispose();
 
 ```java
 // watch for specific event along with its topic
-Subscription eventSub = bizClient.subscribe("spaces", "SPACE_ADDED", new EventCallback() {
+Subscription eventSub = biz.subscribe("spaces", "SPACE_ADDED", new EventCallback() {
     @Override
     public void onFire(EventMessage message) {
-        @Override
-        public void run() {
-            System.out.println("event = " + message.getPayload());
-        }
+        System.out.println("event = " + message.getPayload());
     }
 });
 
@@ -101,5 +92,5 @@ eventSub.dispose();
 **Usage**
 
 ```java
-bizClient.disconnect();
+biz.disconnect();
 ```
