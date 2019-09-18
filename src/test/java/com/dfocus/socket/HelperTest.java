@@ -1,5 +1,9 @@
 package com.dfocus.socket;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -25,10 +29,19 @@ public class HelperTest {
 	}
 
 	@Test
-	public void stringTojson() throws JSONException {
-		JSONObject obj = new JSONObject("{\"projectId\":\"fm\",\"token\":\"asdfg\"}");
+	public void checkOrgJson() throws JSONException {
 
-		Assert.assertEquals("fm", obj.getString("projectId"));
+		Map<String, String> authData = new HashMap<String, String>();
+		authData.put("token", "asdfgh");
+
+		JSONArray arr = new JSONArray();
+		arr.put("auth");
+		arr.put(authData);
+
+		System.out.println(arr.toString());
+
+		Assert.assertEquals("[\"auth\",{\"token\":\"asdfgh\"}]", arr.toString());
+		// Android env is: ["auth","{token=asdfgh}"]
 	}
 
 }
