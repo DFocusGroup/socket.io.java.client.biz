@@ -9,6 +9,7 @@ public class BizEventTest {
 	public void equals() {
 		Assert.assertTrue(BizEvent.AUTH.equals("auth"));
 		Assert.assertTrue(BizEvent.SUBSCRIBE.equals("subscribe"));
+		Assert.assertTrue(BizEvent.AUTH.equals(BizEvent.from("auth")));
 	}
 
 	@Test

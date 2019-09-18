@@ -9,6 +9,7 @@ public class SubscribeCodeTest {
 	public void equals() {
 		Assert.assertTrue(SubscribeCode.SUB_SUCCESS.equals("sub_success"));
 		Assert.assertTrue(SubscribeCode.SUB_FAILED.equals("sub_fail"));
+		Assert.assertTrue(SubscribeCode.SUB_SUCCESS.equals(SubscribeCode.from("sub_success")));
 	}
 
 	@Test
