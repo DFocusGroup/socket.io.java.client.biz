@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ClientStateTest {
+
 	@Test
 	public void equals() {
 		Assert.assertTrue(ClientState.CONNECTED.equals("connected"));
@@ -13,8 +14,10 @@ public class ClientStateTest {
 
 	@Test
 	public void from() {
-		Assert.assertEquals(ClientState.from("connected"), ClientState.CONNECTED);
-		Assert.assertEquals(ClientState.from("connecting"), ClientState.CONNECTING);
-		Assert.assertEquals(ClientState.from("disconnected"), ClientState.DISCONNECTED);
+		Assert.assertEquals(ClientState.CONNECTED, ClientState.from("connected"));
+		Assert.assertEquals(ClientState.CONNECTING, ClientState.from("connecting"));
+		Assert.assertEquals(ClientState.DISCONNECTED, ClientState.from("disconnected"));
+		Assert.assertEquals(null, ClientState.from("hello"));
 	}
+
 }

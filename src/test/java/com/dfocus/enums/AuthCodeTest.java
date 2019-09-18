@@ -12,7 +12,8 @@ public class AuthCodeTest {
 
 	@Test
 	public void from() {
-		Assert.assertEquals(AuthCode.from("auth_success"), AuthCode.AUTH_SUCCESS);
-		Assert.assertEquals(AuthCode.from("auth_fail"), AuthCode.AUTH_FAILED);
+		Assert.assertEquals(AuthCode.AUTH_SUCCESS, AuthCode.from("auth_success"));
+		Assert.assertEquals(AuthCode.AUTH_FAILED, AuthCode.from("auth_fail"));
+		Assert.assertEquals(null, AuthCode.from("hello"));
 	}
 }
