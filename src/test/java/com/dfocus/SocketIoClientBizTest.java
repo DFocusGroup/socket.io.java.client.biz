@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 import com.dfocus.enums.BizEvent;
 import com.dfocus.enums.ClientState;
+import com.dfocus.error.InvalidArgumentException;
 import com.dfocus.error.LifecycleException;
 import com.dfocus.factories.SocketIOFactory;
 import com.dfocus.options.SocketOpts;
@@ -44,18 +45,19 @@ public class SocketIoClientBizTest {
 		SocketIOFactory factory = new SocketIOFactory(opts);
 
 		SocketIoClientBiz biz = new SocketIoClientBiz(factory);
-		
+
 		biz.connect(new Finish() {
 			@Override
-			public void onFinished(String errorMessage) {}
+			public void onFinished(String errorMessage) {
+			}
 		});
 
-
 		biz.connect(new Finish() {
 			@Override
-			public void onFinished(String errorMessage) {}
-		});	
-		
+			public void onFinished(String errorMessage) {
+			}
+		});
+
 	}
 
 	@Test
@@ -70,42 +72,40 @@ public class SocketIoClientBizTest {
 
 			@Override
 			public Void answer(InvocationOnMock invocation) throws Throwable {
-				Emitter.Listener callback = (Emitter.Listener)invocation.getArgument(1);
+				Emitter.Listener callback = (Emitter.Listener) invocation.getArgument(1);
 				callback.call();
 				return null;
 			}
-			
-		}).when(socket)
-			.on(eq(Socket.EVENT_CONNECT), any(Emitter.Listener.class));
+
+		}).when(socket).on(eq(Socket.EVENT_CONNECT), any(Emitter.Listener.class));
 
 		doAnswer(new Answer<Void>() {
 
 			@Override
 			public Void answer(InvocationOnMock invocation) throws Throwable {
-				Ack callback = (Ack)invocation.getArgument(2);
+				Ack callback = (Ack) invocation.getArgument(2);
 				callback.call("auth_fail");
 				return null;
 			}
-			
-		}).when(socket)
-			.emit(eq(BizEvent.AUTH.toString()), any(JSONObject.class), any(Ack.class));
-	 
-		
+
+		}).when(socket).emit(eq(BizEvent.AUTH.toString()), any(JSONObject.class), any(Ack.class));
+
 		when(factory.get()).thenReturn(socket);
 		when(factory.getAuthData()).thenReturn(new JSONObject());
 		when(socket.connect()).thenReturn(null);
 
 		try {
-			biz.connect(new Finish(){
+			biz.connect(new Finish() {
 				@Override
 				public void onFinished(String errorMessage) {
 					Assert.assertEquals("auth_fail", errorMessage);
 				}
 			});
-		} catch (NullPointerException e) {
+		}
+		catch (NullPointerException e) {
 			// do nothing
 		}
-		
+
 	}
 
 	@Test
@@ -121,32 +121,29 @@ public class SocketIoClientBizTest {
 
 			@Override
 			public Void answer(InvocationOnMock invocation) throws Throwable {
-				Emitter.Listener callback = (Emitter.Listener)invocation.getArgument(1);
+				Emitter.Listener callback = (Emitter.Listener) invocation.getArgument(1);
 				callback.call();
 				return null;
 			}
-			
-		}).when(socket)
-			.on(eq(Socket.EVENT_CONNECT), any(Emitter.Listener.class));
+
+		}).when(socket).on(eq(Socket.EVENT_CONNECT), any(Emitter.Listener.class));
 
 		doAnswer(new Answer<Void>() {
 
 			@Override
 			public Void answer(InvocationOnMock invocation) throws Throwable {
-				Ack callback = (Ack)invocation.getArgument(2);
+				Ack callback = (Ack) invocation.getArgument(2);
 				callback.call("auth_success");
 				return null;
 			}
-			
-		}).when(socket)
-			.emit(eq(BizEvent.AUTH.toString()), any(JSONObject.class), any(Ack.class));
-	 
-		
+
+		}).when(socket).emit(eq(BizEvent.AUTH.toString()), any(JSONObject.class), any(Ack.class));
+
 		when(factory.get()).thenReturn(socket);
 		when(factory.getAuthData()).thenReturn(authData);
 		when(socket.connect()).thenReturn(null);
 
-		biz.connect(new Finish(){
+		biz.connect(new Finish() {
 			@Override
 			public void onFinished(String errorMessage) {
 				Assert.assertEquals("", errorMessage);
@@ -183,46 +180,53 @@ public class SocketIoClientBizTest {
 
 			@Override
 			public Void answer(InvocationOnMock invocation) throws Throwable {
-				Emitter.Listener callback = (Emitter.Listener)invocation.getArgument(1);
+				Emitter.Listener callback = (Emitter.Listener) invocation.getArgument(1);
 				callback.call();
 				return null;
 			}
-			
-		}).when(socket)
-			.on(eq(Socket.EVENT_CONNECT), any(Emitter.Listener.class));
+
+		}).when(socket).on(eq(Socket.EVENT_CONNECT), any(Emitter.Listener.class));
 
 		doAnswer(new Answer<Void>() {
 
 			@Override
 			public Void answer(InvocationOnMock invocation) throws Throwable {
-				Ack callback = (Ack)invocation.getArgument(2);
+				Ack callback = (Ack) invocation.getArgument(2);
 				callback.call("auth_success");
 				return null;
 			}
-			
-		}).when(socket)
-			.emit(eq(BizEvent.AUTH.toString()), any(JSONObject.class), any(Ack.class));
-	 
-		
+
+		}).when(socket).emit(eq(BizEvent.AUTH.toString()), any(JSONObject.class), any(Ack.class));
+
 		when(factory.get()).thenReturn(socket);
 		when(factory.getAuthData()).thenReturn(authData);
 		when(socket.connect()).thenReturn(null);
 
-		biz.onStateChange(new StateChangeCallback(){
-		
+		biz.onStateChange(new StateChangeCallback() {
+
 			@Override
 			public void onChange(ClientState state) {
 				Assert.assertEquals(ClientState.CONNECTED, state);
 			}
 		});
-		
 
-		biz.connect(new Finish(){
+		biz.connect(new Finish() {
 			@Override
 			public void onFinished(String errorMessage) {
 			}
 		});
-		
+
+	}
+
+	@Test(expected = InvalidArgumentException.class)
+	public void invalidArgument() throws InvalidArgumentException, LifecycleException {
+		SocketOpts opts = new SocketOpts("http://mock.dfocus.com", "fm", "111");
+		SocketIOFactory factory = new SocketIOFactory(opts);
+
+		SocketIoClientBiz biz = new SocketIoClientBiz(factory);
+
+		biz.subscribe(null, null, null);
+
 	}
 
 }
